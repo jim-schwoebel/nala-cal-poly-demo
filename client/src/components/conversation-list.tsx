@@ -14,6 +14,15 @@ export function ConversationList({
   onSelect,
   onDelete,
 }: ConversationListProps) {
+  if (conversations.length === 0) {
+    return (
+      <div className="conversation-list conversation-list--empty">
+        <p>No conversations yet</p>
+        <p>Tap the mic or pick a topic to start</p>
+      </div>
+    );
+  }
+
   return (
     <div className="conversation-list">
       {conversations.map((convo) => (

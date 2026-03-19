@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ConversationSidebar } from "./conversation-sidebar";
+import { ConversationHeader } from "./conversation-header";
 import { MainPanel } from "./main-panel";
 import { ChatHistory } from "./chat-history";
 import { StatusIndicator } from "./status-indicator";
@@ -7,16 +8,22 @@ import type { Status } from "./status-indicator";
 import { Waveform } from "./waveform";
 import { VoiceControls } from "./voice-controls";
 import { ModelLoader } from "./model-loader";
+import { MicPermissionModal } from "./mic-permission-modal";
+import { DeleteToast } from "./delete-toast";
 import { useConversations } from "../hooks/use-conversations";
 import { useMessages } from "../hooks/use-messages";
 import { useWebLLM } from "../hooks/use-web-llm";
 import { useVoiceInput } from "../hooks/use-voice-input";
 import { useVoiceOutput } from "../hooks/use-voice-output";
 import { useAudioAnalyser } from "../hooks/use-audio-analyser";
+import type { Conversation } from "@nala/shared";
 
 export function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [conversationActive, setConversationActive] = useState(false);
+  const [showMicModal, setShowMicModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [deleteToast, setDeleteToast] = useState<{ conversation: Conversation; messages: any[] } | null>(null);
   const { conversations, create, remove, updateTitle } = useConversations();
   const { messages, isGenerating, sendMessage } = useMessages(selectedId);
   const webLLM = useWebLLM();
@@ -25,8 +32,8 @@ export function App() {
   const audioAnalyser = useAudioAnalyser();
   const selectedIdRef = useRef(selectedId);
   const messagesRef = useRef(messages);
+  const micPermissionGranted = useRef(false);
 
-  // Keep refs in sync
   useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
@@ -35,7 +42,17 @@ export function App() {
     webLLM.init();
   }, []);
 
-  // Auto-restart listening after TTS finishes speaking
+  // Check media query for mobile
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) setSidebarOpen(false);
+    };
+    handler(mq);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   const autoResumeListen = useCallback(() => {
     if (conversationActive) {
       audioAnalyser.start().then(() => {
@@ -50,7 +67,6 @@ export function App() {
       const transcript = voiceInput.transcript;
       audioAnalyser.stop();
 
-      // Check for stop command
       if (transcript.toLowerCase().trim() === "stop" || transcript.toLowerCase().trim() === "stop.") {
         setConversationActive(false);
         return;
@@ -75,26 +91,45 @@ export function App() {
     }
   }, [messages]);
 
+  const startMicSession = useCallback(async () => {
+    let convoId = selectedId;
+    if (!convoId) {
+      const convo = await create();
+      convoId = convo.id;
+      setSelectedId(convo.id);
+    }
+    setConversationActive(true);
+    await audioAnalyser.start();
+    voiceInput.startListening();
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) setSidebarOpen(false);
+  }, [selectedId]);
+
   const handleToggleMic = useCallback(async () => {
     if (conversationActive) {
-      // Stop the conversation
       setConversationActive(false);
       voiceInput.stopListening();
       voiceOutput.cancel();
       audioAnalyser.stop();
     } else {
-      // Start a conversation
-      let convoId = selectedId;
-      if (!convoId) {
-        const convo = await create();
-        convoId = convo.id;
-        setSelectedId(convo.id);
+      // Show permission modal on first use
+      if (!micPermissionGranted.current) {
+        setShowMicModal(true);
+      } else {
+        await startMicSession();
       }
-      setConversationActive(true);
-      await audioAnalyser.start();
-      voiceInput.startListening();
     }
-  }, [conversationActive, selectedId]);
+  }, [conversationActive, selectedId, startMicSession]);
+
+  const handleMicAllow = useCallback(async () => {
+    setShowMicModal(false);
+    micPermissionGranted.current = true;
+    await startMicSession();
+  }, [startMicSession]);
+
+  const handleMicDeny = useCallback(() => {
+    setShowMicModal(false);
+  }, []);
 
   const handleCreate = useCallback(async () => {
     setConversationActive(false);
@@ -103,17 +138,23 @@ export function App() {
     audioAnalyser.stop();
     const convo = await create();
     setSelectedId(convo.id);
+    if (window.innerWidth <= 768) setSidebarOpen(false);
   }, [create]);
 
   const handleDelete = useCallback(
     async (id: string) => {
+      // Find conversation for toast
+      const convo = conversations.find((c) => c.id === id);
+      if (convo) {
+        setDeleteToast({ conversation: convo, messages: [] });
+      }
       await remove(id);
       if (selectedId === id) {
         setSelectedId(null);
         setConversationActive(false);
       }
     },
-    [remove, selectedId]
+    [remove, selectedId, conversations]
   );
 
   const handlePromptSelect = useCallback(async (prompt: string) => {
@@ -129,7 +170,11 @@ export function App() {
         updateTitle(convoId!, prompt.slice(0, 50));
       }
     });
+    if (window.innerWidth <= 768) setSidebarOpen(false);
   }, [selectedId]);
+
+  // Get current conversation title
+  const currentTitle = conversations.find((c) => c.id === selectedId)?.title || null;
 
   // Determine current status
   let status: Status = "idle";
@@ -143,23 +188,61 @@ export function App() {
   else if (isGenerating) waveformMode = "thinking";
   else if (voiceOutput.isSpeaking) waveformMode = "speaking";
 
-  // Gate on model loading
   if (!webLLM.isReady) {
     return <ModelLoader progress={webLLM.loadProgress} error={webLLM.error} />;
   }
 
   return (
     <div className="app">
-      <ConversationSidebar
-        conversations={conversations}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        onCreate={handleCreate}
-        onDelete={handleDelete}
-      />
+      {showMicModal && (
+        <MicPermissionModal onAllow={handleMicAllow} onDeny={handleMicDeny} />
+      )}
+
+      {deleteToast && (
+        <DeleteToast
+          conversationTitle={deleteToast.conversation.title || "New Conversation"}
+          onUndo={() => {
+            // Re-create is not possible after server delete, just dismiss
+            setDeleteToast(null);
+          }}
+          onDismiss={() => setDeleteToast(null)}
+        />
+      )}
+
+      <div className={`sidebar-backdrop ${sidebarOpen ? "sidebar-backdrop--visible" : ""}`} onClick={() => setSidebarOpen(false)} />
+
+      <div className={`sidebar-drawer ${sidebarOpen ? "sidebar-drawer--open" : ""}`}>
+        <ConversationSidebar
+          conversations={conversations}
+          selectedId={selectedId}
+          onSelect={(id) => {
+            setSelectedId(id);
+            if (window.innerWidth <= 768) setSidebarOpen(false);
+          }}
+          onCreate={handleCreate}
+          onDelete={handleDelete}
+        />
+      </div>
+
       <MainPanel>
+        {selectedId && (
+          <ConversationHeader
+            title={currentTitle}
+            onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+            showMenuButton={true}
+          />
+        )}
+        {!selectedId && (
+          <ConversationHeader
+            title={null}
+            onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+            showMenuButton={true}
+          />
+        )}
         <ChatHistory
           messages={messages}
+          isGenerating={isGenerating}
+          isSpeaking={voiceOutput.isSpeaking}
           onPromptSelect={handlePromptSelect}
         />
         <StatusIndicator status={status} />

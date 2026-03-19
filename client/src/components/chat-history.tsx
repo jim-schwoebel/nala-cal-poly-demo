@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Message } from "@nala/shared";
 import { MessageBubble } from "./message-bubble";
+import { TypingIndicator } from "./typing-indicator";
 
 const STARTER_PROMPTS = [
   { emoji: "👋", text: "Tell me about yourself, Nala" },
@@ -13,21 +14,28 @@ const STARTER_PROMPTS = [
 
 interface ChatHistoryProps {
   messages: Message[];
+  isGenerating?: boolean;
+  isSpeaking?: boolean;
   onPromptSelect?: (prompt: string) => void;
 }
 
-export function ChatHistory({ messages, onPromptSelect }: ChatHistoryProps) {
+export function ChatHistory({ messages, isGenerating, isSpeaking, onPromptSelect }: ChatHistoryProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (bottomRef.current && typeof bottomRef.current.scrollIntoView === "function") {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, isGenerating]);
+
+  // The last assistant message is "speaking" if TTS is active
+  const lastAssistantIdx = isSpeaking
+    ? messages.map((m) => m.role).lastIndexOf("assistant")
+    : -1;
 
   return (
     <div className="chat-history">
-      {messages.length === 0 ? (
+      {messages.length === 0 && !isGenerating ? (
         <div className="chat-history__welcome">
           <h1 className="chat-history__title">Hi, I'm Nala</h1>
           <p className="chat-history__subtitle">
@@ -47,7 +55,16 @@ export function ChatHistory({ messages, onPromptSelect }: ChatHistoryProps) {
           </div>
         </div>
       ) : (
-        messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
+        <>
+          {messages.map((msg, i) => (
+            <MessageBubble
+              key={msg.id}
+              message={msg}
+              isSpeaking={i === lastAssistantIdx}
+            />
+          ))}
+          {isGenerating && <TypingIndicator />}
+        </>
       )}
       <div ref={bottomRef} />
     </div>
