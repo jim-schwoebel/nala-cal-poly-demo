@@ -233,6 +233,14 @@ export function App() {
           }}
           onCreate={handleCreate}
           onDelete={handleDelete}
+          onGoHome={() => {
+            setSelectedId(null);
+            setConversationActive(false);
+            voiceInput.stopListening();
+            voiceOutput.cancel();
+            audioAnalyser.stop();
+            if (window.innerWidth <= 768) setSidebarOpen(false);
+          }}
         />
       </div>
 
