@@ -1,16 +1,27 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 export function useVoiceOutput() {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const onDoneRef = useRef<(() => void) | null>(null);
 
-  const speak = useCallback((text: string) => {
-    if (!("speechSynthesis" in globalThis)) return;
+  const speak = useCallback((text: string, onDone?: () => void) => {
+    if (!("speechSynthesis" in globalThis)) {
+      onDone?.();
+      return;
+    }
 
+    onDoneRef.current = onDone || null;
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
 
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      onDoneRef.current?.();
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      onDoneRef.current?.();
+    };
 
     setIsSpeaking(true);
     speechSynthesis.speak(utterance);

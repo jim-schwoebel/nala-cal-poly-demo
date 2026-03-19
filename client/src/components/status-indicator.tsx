@@ -1,4 +1,4 @@
-export type Status = "idle" | "listening" | "thinking";
+export type Status = "idle" | "listening" | "thinking" | "speaking";
 
 interface StatusIndicatorProps {
   status: Status;
@@ -8,6 +8,7 @@ const STATUS_TEXT: Record<Status, string> = {
   idle: "",
   listening: "Listening...",
   thinking: "Thinking...",
+  speaking: "Nala is speaking...",
 };
 
 export function StatusIndicator({ status }: StatusIndicatorProps) {
