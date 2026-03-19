@@ -9,6 +9,16 @@ export default defineConfig({
     proxy: {
       "/api": process.env.API_URL || "http://localhost:3001",
     },
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "credentialless",
+    },
+  },
+  optimizeDeps: {
+    exclude: ["kokoro-js", "@huggingface/transformers"],
+  },
+  worker: {
+    format: "es",
   },
   test: {
     environment: "jsdom",
