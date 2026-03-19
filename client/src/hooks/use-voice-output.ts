@@ -1,13 +1,13 @@
 import { useState, useCallback, useRef } from "react";
 import { KokoroTTS } from "kokoro-js";
 
+const USE_KOKORO = import.meta.env.VITE_TTS === "kokoro";
+
 let ttsInstance: KokoroTTS | null = null;
-let ttsLoadFailed = false;
 let ttsLoading = false;
 const ttsReadyCallbacks: ((tts: KokoroTTS | null) => void)[] = [];
 
 async function getTTS(): Promise<KokoroTTS | null> {
-  if (ttsLoadFailed) return null;
   if (ttsInstance) return ttsInstance;
 
   if (ttsLoading) {
@@ -29,25 +29,12 @@ async function getTTS(): Promise<KokoroTTS | null> {
     ttsReadyCallbacks.length = 0;
     return ttsInstance;
   } catch (err) {
-    console.warn("[Nala TTS] Kokoro failed to load, falling back to Web Speech API:", err);
-    ttsLoadFailed = true;
+    console.warn("[Nala TTS] Kokoro failed to load:", err);
     ttsLoading = false;
     ttsReadyCallbacks.forEach((cb) => cb(null));
     ttsReadyCallbacks.length = 0;
     return null;
   }
-}
-
-function speakWithWebSpeech(text: string, onEnd: () => void) {
-  if (!("speechSynthesis" in globalThis)) {
-    onEnd();
-    return;
-  }
-  speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.onend = onEnd;
-  utterance.onerror = onEnd;
-  speechSynthesis.speak(utterance);
 }
 
 export function useVoiceOutput() {
@@ -57,46 +44,54 @@ export function useVoiceOutput() {
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
   const onDoneRef = useRef<(() => void) | null>(null);
 
-  const speak = useCallback(async (text: string, onDone?: () => void) => {
-    onDoneRef.current = onDone || null;
+  const speakWithWebSpeech = useCallback((text: string) => {
+    if (!("speechSynthesis" in globalThis)) {
+      setIsSpeaking(false);
+      onDoneRef.current?.();
+      return;
+    }
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      onDoneRef.current?.();
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      onDoneRef.current?.();
+    };
+    setIsSpeaking(true);
+    speechSynthesis.speak(utterance);
+  }, []);
 
+  const speakWithKokoro = useCallback(async (text: string) => {
     try {
       setIsLoading(true);
       const tts = await getTTS();
       setIsLoading(false);
 
-      // Fallback to Web Speech API if Kokoro failed to load
       if (!tts) {
-        setIsSpeaking(true);
-        speakWithWebSpeech(text, () => {
-          setIsSpeaking(false);
-          onDoneRef.current?.();
-        });
+        // Fallback to Web Speech if Kokoro fails
+        speakWithWebSpeech(text);
         return;
       }
 
-      console.log("[Nala TTS] Generating speech...");
       const result = await tts.generate(text, { voice: "af_heart" });
-      console.log("[Nala TTS] Speech generated, playing audio");
 
-      // Stop any currently playing audio
       if (sourceRef.current) {
         sourceRef.current.stop();
         sourceRef.current = null;
       }
 
-      // Play using AudioContext for maximum compatibility
       if (!audioContextRef.current) {
         audioContextRef.current = new AudioContext();
       }
       const audioCtx = audioContextRef.current;
 
-      // Resume context if suspended (browser autoplay policy)
       if (audioCtx.state === "suspended") {
         await audioCtx.resume();
       }
 
-      // Convert RawAudio WAV to AudioBuffer
       const wavBuffer = result.toWav();
       const audioBuffer = await audioCtx.decodeAudioData(wavBuffer);
 
@@ -114,15 +109,19 @@ export function useVoiceOutput() {
       setIsSpeaking(true);
       source.start(0);
     } catch (err) {
-      console.error("[Nala TTS] Error:", err);
+      console.error("[Nala TTS] Kokoro error, falling back:", err);
       setIsLoading(false);
+      speakWithWebSpeech(text);
+    }
+  }, []);
 
-      // Fallback to Web Speech API on any error
-      setIsSpeaking(true);
-      speakWithWebSpeech(text, () => {
-        setIsSpeaking(false);
-        onDoneRef.current?.();
-      });
+  const speak = useCallback(async (text: string, onDone?: () => void) => {
+    onDoneRef.current = onDone || null;
+
+    if (USE_KOKORO) {
+      await speakWithKokoro(text);
+    } else {
+      speakWithWebSpeech(text);
     }
   }, []);
 
