@@ -613,13 +613,16 @@ body {
 
 /* ============ MIC BUTTON ============ */
 .mic-button {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   border: none;
   background: var(--primary);
   color: #fff;
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
   box-shadow: var(--shadow-md);
@@ -883,9 +886,8 @@ body {
   }
 
   .mic-button {
-    width: 66px;
-    height: 66px;
-    font-size: 1.375rem;
+    width: 56px;
+    height: 56px;
   }
 
   .voice-panel__center {
