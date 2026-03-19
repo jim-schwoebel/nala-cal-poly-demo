@@ -45,11 +45,12 @@ export function NalaAvatar({ status }: NalaAvatarProps) {
           : "";
 
   // Mouth geometry based on openness (0=closed, 1=wide open)
-  const mouthY = 72 + mouthOpen * 2;
-  const mouthOpenHeight = mouthOpen * 5;
-  const mouthPath = mouthOpen < 0.15
-    ? `M55 72 Q60 ${74 + mouthOpen * 8} 65 72`
-    : `M54 ${mouthY - 1} Q60 ${mouthY + mouthOpenHeight + 2} 66 ${mouthY - 1} Q60 ${mouthY - mouthOpenHeight - 1} 54 ${mouthY - 1}`;
+  const mouthCY = 73 + mouthOpen * 2;
+  const openH = mouthOpen * 10;
+  const halfW = 7 + mouthOpen * 3;
+  const mouthPath = mouthOpen < 0.12
+    ? `M${60 - halfW} 72 Q60 ${74 + mouthOpen * 10} ${60 + halfW} 72`
+    : `M${60 - halfW} ${mouthCY} Q60 ${mouthCY + openH + 2} ${60 + halfW} ${mouthCY} Q60 ${mouthCY - openH - 1} ${60 - halfW} ${mouthCY}`;
 
   return (
     <div className="nala-avatar">
@@ -121,10 +122,10 @@ export function NalaAvatar({ status }: NalaAvatarProps) {
           <ellipse cx="60" cy="67" rx="5" ry="3.5" fill="url(#nose-grad)" />
 
           {/* Mouth — animated lip sync */}
-          {mouthOpen < 0.15 ? (
-            <path d={mouthPath} stroke="#8b5a30" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          {mouthOpen < 0.12 ? (
+            <path d={mouthPath} stroke="#8b5a30" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           ) : (
-            <path d={mouthPath} stroke="#8b5a30" strokeWidth="1.2" fill="#c45a3a" strokeLinecap="round" />
+            <path d={mouthPath} stroke="#6b3a1a" strokeWidth="1.8" fill="#c0392b" strokeLinecap="round" />
           )}
 
           {/* Whisker dots */}
