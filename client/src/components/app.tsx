@@ -84,21 +84,22 @@ export function App() {
     }
   }, [voiceInput.isListening, voiceInput.transcript]);
 
-  // Cancel playback and reset when switching conversations
+  // Cancel playback when switching conversations and mark history as "already seen"
+  const suppressNextMessages = useRef(false);
   useEffect(() => {
     voiceOutput.cancel();
-    lastSpokenMsgId.current = null;
+    suppressNextMessages.current = true;
   }, [selectedId]);
 
-  // Speak assistant response — only new messages, not loaded history
+  // Speak assistant response — skip messages loaded from history
   useEffect(() => {
+    if (suppressNextMessages.current) {
+      suppressNextMessages.current = false;
+      return;
+    }
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      if (
-        lastMessage.role === "assistant" &&
-        lastMessage.id !== lastSpokenMsgId.current
-      ) {
-        lastSpokenMsgId.current = lastMessage.id;
+      if (lastMessage.role === "assistant") {
         voiceOutput.speak(lastMessage.content, autoResumeListen);
       }
     }
