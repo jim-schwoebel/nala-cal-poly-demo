@@ -2,6 +2,14 @@
 
 A voice-first AI assistant that runs entirely in your browser. Talk to Nala, and she talks back — no cloud APIs, no API keys, no data leaving your device.
 
+<p align="center">
+  <img src="docs/assets/nala-demo.gif" alt="Nala demo" width="720" />
+</p>
+
+<p align="center">
+  <a href="https://drive.google.com/file/d/1GbNv7TEwUyeWNFDvmbFm--18sj3Is3HC/view?usp=sharing">Watch full demo video</a>
+</p>
+
 Built with React, Express, PostgreSQL, [WebLLM](https://github.com/mlc-ai/web-llm) (browser-local LLM), and the Web Speech API.
 
 ## Features
