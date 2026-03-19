@@ -469,83 +469,55 @@ body {
 
 /* ============ WELCOME SCREEN ============ */
 .welcome {
-  margin: auto;
-  text-align: center;
-  max-width: 540px;
-  padding: 0 20px;
-}
-
-.welcome .nala-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-}
-
-.welcome .nala-logo__text {
-  color: var(--primary);
+  flex: 1;
+  gap: 16px;
+  padding: 24px 20px;
 }
 
 .welcome__heading {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: 8px;
-}
-
-.welcome__sub {
   font-size: 0.9375rem;
+  font-weight: 500;
   color: var(--text-tertiary);
-  margin-bottom: 32px;
 }
 
 .welcome__prompts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
 }
 
-/* ============ PROMPT CARDS ============ */
-.prompt-card {
-  display: flex;
+/* ============ PROMPT CHIPS ============ */
+.prompt-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
+  gap: 6px;
+  padding: 8px 16px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 20px;
   background: var(--surface);
   cursor: pointer;
   font-size: 0.8125rem;
   color: var(--text-secondary);
-  text-align: left;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
   font-family: inherit;
+  font-weight: 500;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  white-space: nowrap;
 }
 
-.prompt-card:hover {
+.prompt-chip:hover {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-bg);
   background: #fafaff;
+  color: var(--primary);
 }
 
-.prompt-card__emoji {
-  font-size: 1.125rem;
-  flex-shrink: 0;
-}
-
-.prompt-card__text {
-  flex: 1;
-}
-
-.prompt-card__arrow {
-  flex-shrink: 0;
-  color: var(--text-tertiary);
-  opacity: 0;
-  transition: opacity 0.15s, transform 0.15s;
-}
-
-.prompt-card:hover .prompt-card__arrow {
-  opacity: 1;
-  transform: translateX(2px);
+.prompt-chip__emoji {
+  font-size: 0.9375rem;
 }
 
 /* ============ MESSAGE BUBBLES ============ */
@@ -854,11 +826,8 @@ body {
   }
 
   .welcome__prompts {
-    grid-template-columns: 1fr;
-  }
-
-  .welcome__heading {
-    font-size: 1.375rem;
+    flex-direction: column;
+    align-items: center;
   }
 
   .message-bubble {
