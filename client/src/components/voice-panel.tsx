@@ -13,13 +13,6 @@ interface VoicePanelProps {
   conversationActive: boolean;
 }
 
-const STATUS_LABEL: Record<Status, string> = {
-  idle: "Tap to start talking",
-  listening: "Listening...",
-  thinking: "Thinking...",
-  speaking: "Nala is speaking...",
-};
-
 export function VoicePanel({
   status,
   waveformMode,
@@ -32,21 +25,39 @@ export function VoicePanel({
   return (
     <div className="voice-panel">
       <div className="voice-panel__inner">
-        <div className="voice-panel__avatar-area">
-          <Waveform mode={waveformMode} analyserNode={analyserNode} />
-          <div className="voice-panel__avatar-overlay">
-            <NalaAvatar status={status} />
+        {/* You section */}
+        <div className="voice-panel__side">
+          <div className="voice-panel__circle">
+            <MicButton isRecording={isRecording} onClick={onToggleMic} disabled={micDisabled} />
           </div>
+          <span className="voice-panel__label">You</span>
+          <span className="voice-panel__sublabel">
+            {isRecording ? "Listening..." : conversationActive ? "Say \u201cstop\u201d to end" : "Tap to talk"}
+          </span>
         </div>
 
-        <div className="voice-panel__controls">
+        {/* Center status */}
+        <div className="voice-panel__center">
+          <div className="voice-panel__connector" />
           <span className={`voice-panel__status ${status !== "idle" ? "voice-panel__status--active" : ""}`}>
-            {STATUS_LABEL[status]}
+            {status === "idle" ? "" : status === "listening" ? "Listening" : status === "thinking" ? "Thinking" : "Speaking"}
           </span>
-          <MicButton isRecording={isRecording} onClick={onToggleMic} disabled={micDisabled} />
-          {conversationActive && (
-            <span className="voice-panel__hint">Say &ldquo;stop&rdquo; to end</span>
-          )}
+        </div>
+
+        {/* Nala section */}
+        <div className="voice-panel__side">
+          <div className="voice-panel__circle voice-panel__nala-circle">
+            <div className="voice-panel__waveform-bg">
+              <Waveform mode={waveformMode} analyserNode={analyserNode} />
+            </div>
+            <div className="voice-panel__avatar-fg">
+              <NalaAvatar status={status} />
+            </div>
+          </div>
+          <span className="voice-panel__label">Nala</span>
+          <span className="voice-panel__sublabel">
+            {status === "speaking" ? "Speaking..." : status === "thinking" ? "Thinking..." : "Voice assistant"}
+          </span>
         </div>
       </div>
     </div>

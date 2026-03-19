@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import type { Status } from "./status-indicator";
 
 interface NalaAvatarProps {
@@ -5,6 +6,35 @@ interface NalaAvatarProps {
 }
 
 export function NalaAvatar({ status }: NalaAvatarProps) {
+  const isSpeaking = status === "speaking";
+  const [mouthOpen, setMouthOpen] = useState(0);
+  const frameRef = useRef<number>(0);
+  const timeRef = useRef(0);
+
+  // Animate mouth when speaking
+  useEffect(() => {
+    if (!isSpeaking) {
+      setMouthOpen(0);
+      return;
+    }
+
+    function animate() {
+      timeRef.current += 0.06;
+      const t = timeRef.current;
+      // Combine multiple sine waves for natural-looking mouth movement
+      const open =
+        Math.abs(Math.sin(t * 3.2)) * 0.4 +
+        Math.abs(Math.sin(t * 5.7 + 1)) * 0.3 +
+        Math.abs(Math.sin(t * 8.1 + 2)) * 0.15 +
+        Math.random() * 0.1;
+      setMouthOpen(Math.min(open, 0.95));
+      frameRef.current = requestAnimationFrame(animate);
+    }
+
+    frameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [isSpeaking]);
+
   const ringClass =
     status === "listening"
       ? "avatar-ring--listening"
@@ -13,6 +43,13 @@ export function NalaAvatar({ status }: NalaAvatarProps) {
         : status === "speaking"
           ? "avatar-ring--speaking"
           : "";
+
+  // Mouth geometry based on openness (0=closed, 1=wide open)
+  const mouthY = 72 + mouthOpen * 2;
+  const mouthOpenHeight = mouthOpen * 5;
+  const mouthPath = mouthOpen < 0.15
+    ? `M55 72 Q60 ${74 + mouthOpen * 8} 65 72`
+    : `M54 ${mouthY - 1} Q60 ${mouthY + mouthOpenHeight + 2} 66 ${mouthY - 1} Q60 ${mouthY - mouthOpenHeight - 1} 54 ${mouthY - 1}`;
 
   return (
     <div className="nala-avatar">
@@ -41,11 +78,11 @@ export function NalaAvatar({ status }: NalaAvatarProps) {
             </radialGradient>
           </defs>
 
-          {/* Mane / fur around face */}
+          {/* Mane */}
           <ellipse cx="60" cy="62" rx="48" ry="46" fill="#c47a2a" />
           <ellipse cx="60" cy="58" rx="44" ry="42" fill="#d4903a" />
 
-          {/* Fur tufts around mane */}
+          {/* Fur tufts */}
           <circle cx="22" cy="42" r="10" fill="#c47a2a" />
           <circle cx="98" cy="42" r="10" fill="#c47a2a" />
           <circle cx="16" cy="58" r="9" fill="#c47a2a" />
@@ -65,7 +102,7 @@ export function NalaAvatar({ status }: NalaAvatarProps) {
           {/* Face */}
           <ellipse cx="60" cy="62" rx="34" ry="32" fill="url(#face-grad)" />
 
-          {/* Lighter muzzle area */}
+          {/* Muzzle */}
           <ellipse cx="60" cy="72" rx="20" ry="16" fill="#fce4a8" />
 
           {/* Eyes */}
@@ -73,19 +110,22 @@ export function NalaAvatar({ status }: NalaAvatarProps) {
           <ellipse cx="74" cy="56" rx="6" ry="6.5" fill="white" />
           <ellipse cx="47" cy="56" rx="3.5" ry="4" fill="#3a2510" />
           <ellipse cx="75" cy="56" rx="3.5" ry="4" fill="#3a2510" />
-          {/* Eye shine */}
           <circle cx="48.5" cy="54.5" r="1.5" fill="white" opacity="0.9" />
           <circle cx="76.5" cy="54.5" r="1.5" fill="white" opacity="0.9" />
 
-          {/* Eyebrows - subtle */}
+          {/* Eyebrows */}
           <path d="M40 49 Q46 46 52 49" stroke="#b8783a" strokeWidth="1.2" fill="none" strokeLinecap="round" />
           <path d="M68 49 Q74 46 80 49" stroke="#b8783a" strokeWidth="1.2" fill="none" strokeLinecap="round" />
 
           {/* Nose */}
           <ellipse cx="60" cy="67" rx="5" ry="3.5" fill="url(#nose-grad)" />
 
-          {/* Mouth */}
-          <path d="M55 72 Q60 77 65 72" stroke="#8b5a30" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          {/* Mouth — animated lip sync */}
+          {mouthOpen < 0.15 ? (
+            <path d={mouthPath} stroke="#8b5a30" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          ) : (
+            <path d={mouthPath} stroke="#8b5a30" strokeWidth="1.2" fill="#c45a3a" strokeLinecap="round" />
+          )}
 
           {/* Whisker dots */}
           <circle cx="48" cy="69" r="0.8" fill="#b8783a" />
