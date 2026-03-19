@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nala
+      POSTGRES_USER: nala
+      POSTGRES_PASSWORD: nala
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/src/db/migrations/001-initial-schema.sql:/docker-entrypoint-initdb.d/001-initial-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nala"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://nala:nala@db:5432/nala
+      PORT: "3001"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server/src:/app/server/src
+      - ./shared:/app/shared
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      API_URL: http://server:3001
+    depends_on:
+      - server
+    volumes:
+      - ./client/src:/app/client/src
+      - ./shared:/app/shared
+
+volumes:
+  pgdata:
