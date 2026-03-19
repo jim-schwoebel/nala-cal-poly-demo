@@ -3,6 +3,12 @@ import { Waveform } from "./waveform";
 import { MicButton } from "./mic-button";
 import type { Status } from "./status-indicator";
 
+const STARTER_PROMPTS = [
+  { emoji: "👋", text: "Introduce yourself" },
+  { emoji: "💡", text: "Creative project idea" },
+  { emoji: "📚", text: "Book recommendation" },
+];
+
 interface VoicePanelProps {
   status: Status;
   waveformMode: "idle" | "recording" | "thinking" | "speaking";
@@ -11,6 +17,8 @@ interface VoicePanelProps {
   onToggleMic: () => void;
   micDisabled: boolean;
   conversationActive: boolean;
+  hasMessages: boolean;
+  onPromptSelect: (prompt: string) => void;
 }
 
 export function VoicePanel({
@@ -21,18 +29,23 @@ export function VoicePanel({
   onToggleMic,
   micDisabled,
   conversationActive,
+  hasMessages,
+  onPromptSelect,
 }: VoicePanelProps) {
+  const showOnboarding = !hasMessages && status === "idle" && !conversationActive;
+
   return (
     <div className="voice-panel">
       <div className="voice-panel__inner">
         {/* You section */}
         <div className="voice-panel__side">
           <div className="voice-panel__circle">
+            {showOnboarding && <div className="mic-cta-ring" />}
             <MicButton isRecording={isRecording} onClick={onToggleMic} disabled={micDisabled} />
           </div>
           <span className="voice-panel__label">You</span>
           <span className="voice-panel__sublabel">
-            {isRecording ? "Listening..." : conversationActive ? "Say \u201cstop\u201d to end" : "Tap to talk"}
+            {isRecording ? "Listening..." : conversationActive ? "Say \u201cstop\u201d to end" : showOnboarding ? "Tap to start" : "Tap to talk"}
           </span>
         </div>
 
@@ -60,6 +73,25 @@ export function VoicePanel({
           </span>
         </div>
       </div>
+
+      {/* Prompt chips — shown in the voice panel when no messages yet */}
+      {showOnboarding && (
+        <div className="voice-panel__onboarding">
+          <span className="voice-panel__or">or try one of these</span>
+          <div className="voice-panel__prompts">
+            {STARTER_PROMPTS.map((prompt) => (
+              <button
+                key={prompt.text}
+                className="prompt-chip"
+                onClick={() => onPromptSelect(prompt.text)}
+              >
+                <span className="prompt-chip__emoji">{prompt.emoji}</span>
+                {prompt.text}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

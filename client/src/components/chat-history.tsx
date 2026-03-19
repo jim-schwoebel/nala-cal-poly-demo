@@ -3,20 +3,13 @@ import type { Message } from "@nala/shared";
 import { MessageBubble } from "./message-bubble";
 import { TypingIndicator } from "./typing-indicator";
 
-const STARTER_PROMPTS = [
-  { emoji: "👋", text: "Introduce yourself" },
-  { emoji: "💡", text: "Creative project idea" },
-  { emoji: "📚", text: "Book recommendation" },
-];
-
 interface ChatHistoryProps {
   messages: Message[];
   isGenerating?: boolean;
   isSpeaking?: boolean;
-  onPromptSelect?: (prompt: string) => void;
 }
 
-export function ChatHistory({ messages, isGenerating, isSpeaking, onPromptSelect }: ChatHistoryProps) {
+export function ChatHistory({ messages, isGenerating, isSpeaking }: ChatHistoryProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,20 +25,8 @@ export function ChatHistory({ messages, isGenerating, isSpeaking, onPromptSelect
   return (
     <div className="chat-history">
       {messages.length === 0 && !isGenerating ? (
-        <div className="welcome">
-          <p className="welcome__heading">Try asking Nala something</p>
-          <div className="welcome__prompts">
-            {STARTER_PROMPTS.map((prompt) => (
-              <button
-                key={prompt.text}
-                className="prompt-chip"
-                onClick={() => onPromptSelect?.(prompt.text)}
-              >
-                <span className="prompt-chip__emoji">{prompt.emoji}</span>
-                {prompt.text}
-              </button>
-            ))}
-          </div>
+        <div className="chat-history__empty-hint">
+          <p>Your conversation will appear here</p>
         </div>
       ) : (
         <>

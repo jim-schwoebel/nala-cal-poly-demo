@@ -250,12 +250,13 @@ export function App() {
           onToggleMic={handleToggleMic}
           micDisabled={isGenerating}
           conversationActive={conversationActive}
+          hasMessages={messages.length > 0}
+          onPromptSelect={handlePromptSelect}
         />
         <ChatHistory
           messages={messages}
           isGenerating={isGenerating}
           isSpeaking={voiceOutput.isSpeaking}
-          onPromptSelect={handlePromptSelect}
         />
       </MainPanel>
     </div>

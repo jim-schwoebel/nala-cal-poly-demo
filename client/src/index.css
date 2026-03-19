@@ -324,8 +324,8 @@ body {
 
 .voice-panel__circle {
   position: relative;
-  width: 88px;
-  height: 88px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -390,6 +390,47 @@ body {
 
 .voice-panel__status--active {
   color: var(--primary);
+}
+
+/* Onboarding section inside voice panel */
+.voice-panel__onboarding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.voice-panel__or {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.voice-panel__prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Pulsing ring around mic to draw attention on first visit */
+.mic-cta-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  animation: cta-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes cta-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0; }
 }
 
 /* ============ NALA AVATAR ============ */
@@ -467,28 +508,14 @@ body {
   gap: 12px;
 }
 
-/* ============ WELCOME SCREEN ============ */
-.welcome {
+/* ============ EMPTY CHAT HINT ============ */
+.chat-history__empty-hint {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1;
-  gap: 16px;
-  padding: 24px 20px;
-}
-
-.welcome__heading {
-  font-size: 0.9375rem;
-  font-weight: 500;
   color: var(--text-tertiary);
-}
-
-.welcome__prompts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
+  font-size: 0.8125rem;
 }
 
 /* ============ PROMPT CHIPS ============ */
@@ -825,7 +852,7 @@ body {
     pointer-events: auto;
   }
 
-  .welcome__prompts {
+  .voice-panel__prompts {
     flex-direction: column;
     align-items: center;
   }
