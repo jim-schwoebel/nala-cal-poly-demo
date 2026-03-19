@@ -34,6 +34,7 @@ export function App() {
   const messagesRef = useRef(messages);
   const conversationActiveRef = useRef(conversationActive);
   const micPermissionGranted = useRef(false);
+  const lastSpokenMsgId = useRef<string | null>(null);
 
   useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
@@ -83,11 +84,21 @@ export function App() {
     }
   }, [voiceInput.isListening, voiceInput.transcript]);
 
-  // Speak assistant response, then auto-resume listening
+  // Cancel playback and reset when switching conversations
+  useEffect(() => {
+    voiceOutput.cancel();
+    lastSpokenMsgId.current = null;
+  }, [selectedId]);
+
+  // Speak assistant response — only new messages, not loaded history
   useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === "assistant") {
+      if (
+        lastMessage.role === "assistant" &&
+        lastMessage.id !== lastSpokenMsgId.current
+      ) {
+        lastSpokenMsgId.current = lastMessage.id;
         voiceOutput.speak(lastMessage.content, autoResumeListen);
       }
     }
@@ -250,7 +261,7 @@ export function App() {
         <StatusIndicator status={status} />
         <Waveform mode={waveformMode} analyserNode={audioAnalyser.analyserNode} />
         <VoiceControls
-          isRecording={conversationActive}
+          isRecording={voiceInput.isListening}
           onToggle={handleToggleMic}
           disabled={isGenerating}
         />
