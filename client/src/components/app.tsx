@@ -3,10 +3,8 @@ import { ConversationSidebar } from "./conversation-sidebar";
 import { ConversationHeader } from "./conversation-header";
 import { MainPanel } from "./main-panel";
 import { ChatHistory } from "./chat-history";
-import { StatusIndicator } from "./status-indicator";
 import type { Status } from "./status-indicator";
-import { Waveform } from "./waveform";
-import { VoiceControls } from "./voice-controls";
+import { VoicePanel } from "./voice-panel";
 import { ModelLoader } from "./model-loader";
 import { MicPermissionModal } from "./mic-permission-modal";
 import { DeleteToast } from "./delete-toast";
@@ -239,36 +237,26 @@ export function App() {
       </div>
 
       <MainPanel>
-        {selectedId && (
-          <ConversationHeader
-            title={currentTitle}
-            onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-            showMenuButton={true}
-          />
-        )}
-        {!selectedId && (
-          <ConversationHeader
-            title={null}
-            onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-            showMenuButton={true}
-          />
-        )}
+        <ConversationHeader
+          title={currentTitle}
+          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          showMenuButton={true}
+        />
+        <VoicePanel
+          status={status}
+          waveformMode={waveformMode}
+          analyserNode={audioAnalyser.analyserNode}
+          isRecording={voiceInput.isListening}
+          onToggleMic={handleToggleMic}
+          micDisabled={isGenerating}
+          conversationActive={conversationActive}
+        />
         <ChatHistory
           messages={messages}
           isGenerating={isGenerating}
           isSpeaking={voiceOutput.isSpeaking}
           onPromptSelect={handlePromptSelect}
         />
-        <StatusIndicator status={status} />
-        <Waveform mode={waveformMode} analyserNode={audioAnalyser.analyserNode} />
-        <VoiceControls
-          isRecording={voiceInput.isListening}
-          onToggle={handleToggleMic}
-          disabled={isGenerating}
-        />
-        {conversationActive && (
-          <p className="stop-hint">Say &quot;stop&quot; to end the conversation</p>
-        )}
       </MainPanel>
     </div>
   );

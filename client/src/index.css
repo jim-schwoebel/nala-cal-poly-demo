@@ -296,6 +296,133 @@ body {
   background: var(--surface);
 }
 
+/* ============ VOICE PANEL (top section) ============ */
+.voice-panel {
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #f0f2f8 0%, #f6f9fc 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 24px 16px;
+}
+
+.voice-panel__inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.voice-panel__avatar-area {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.voice-panel__avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.voice-panel__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.voice-panel__status {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.voice-panel__status--active {
+  color: var(--primary);
+}
+
+.voice-panel__hint {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* ============ NALA AVATAR ============ */
+.nala-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background: #fff8e8;
+}
+
+.avatar-ring--listening {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-bg);
+  animation: avatar-pulse-indigo 1.5s ease-in-out infinite;
+}
+
+.avatar-ring--thinking {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-bg);
+  animation: avatar-breathe 2s ease-in-out infinite;
+}
+
+.avatar-ring--speaking {
+  border-color: #3ecf8e;
+  box-shadow: 0 0 0 4px rgba(62, 207, 142, 0.12);
+  animation: avatar-pulse-green 1.5s ease-in-out infinite;
+}
+
+@keyframes avatar-pulse-indigo {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.1); }
+  50% { box-shadow: 0 0 0 8px rgba(99, 91, 255, 0.05); }
+}
+
+@keyframes avatar-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes avatar-pulse-green {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(62, 207, 142, 0.12); }
+  50% { box-shadow: 0 0 0 8px rgba(62, 207, 142, 0.06); }
+}
+
+.avatar-svg {
+  width: 56px;
+  height: 56px;
+}
+
+/* ============ WAVEFORM ORB (inside voice panel) ============ */
+.waveform-orb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waveform-orb__canvas {
+  width: 100%;
+  height: 100%;
+}
+
 /* ============ CHAT HISTORY ============ */
 .chat-history {
   flex: 1;
@@ -450,45 +577,7 @@ body {
   30% { transform: translateY(-5px); opacity: 1; }
 }
 
-/* ============ STATUS INDICATOR ============ */
-.status-indicator {
-  text-align: center;
-  padding: 8px;
-  color: var(--text-tertiary);
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-/* ============ WAVEFORM ORB ============ */
-.waveform-orb {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 24px;
-}
-
-.waveform-orb__canvas {
-  width: 180px;
-  height: 180px;
-}
-
-/* ============ STOP HINT ============ */
-.stop-hint {
-  text-align: center;
-  color: var(--text-tertiary);
-  font-size: 0.6875rem;
-  padding-bottom: 8px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-}
-
-/* ============ VOICE CONTROLS ============ */
-.voice-controls {
-  display: flex;
-  justify-content: center;
-  padding: 16px;
-}
-
+/* ============ MIC BUTTON ============ */
 .mic-button {
   width: 56px;
   height: 56px;
@@ -739,14 +828,34 @@ body {
     max-width: 88%;
   }
 
-  .mic-button {
-    width: 64px;
-    height: 64px;
-    font-size: 1.5rem;
+  .voice-panel__inner {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
   }
 
-  .waveform-orb__canvas {
-    width: 140px;
-    height: 140px;
+  .voice-panel__controls {
+    align-items: center;
+  }
+
+  .voice-panel__avatar-area {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-ring {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatar-svg {
+    width: 46px;
+    height: 46px;
+  }
+
+  .mic-button {
+    width: 56px;
+    height: 56px;
+    font-size: 1.375rem;
   }
 }
