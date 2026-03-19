@@ -1,3 +1,5 @@
+import { NalaLogo } from "./nala-logo";
+
 interface ModelLoaderProps {
   progress: number;
   error: string | null;
@@ -6,17 +8,16 @@ interface ModelLoaderProps {
 export function ModelLoader({ progress, error }: ModelLoaderProps) {
   return (
     <div className="model-loader">
-      <h1>Nala</h1>
-      <p className="model-loader__subtitle">Voice Assistant</p>
+      <NalaLogo size="lg" />
 
       {error ? (
         <div className="model-loader__error">
           <p>{error}</p>
-          <p>Nala requires Chrome 113+ with WebGPU enabled.</p>
+          <p>Nala requires a modern browser with WebGPU support.</p>
         </div>
       ) : (
         <>
-          <p className="model-loader__status">Loading AI model...</p>
+          <p className="model-loader__status">Preparing your voice assistant...</p>
           <div
             className="model-loader__progress"
             role="progressbar"

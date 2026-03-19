@@ -16,15 +16,15 @@ export function ConversationList({
 }: ConversationListProps) {
   if (conversations.length === 0) {
     return (
-      <div className="conversation-list conversation-list--empty">
-        <p>No conversations yet</p>
-        <p>Tap the mic or pick a topic to start</p>
+      <div className="sidebar-empty">
+        <p className="sidebar-empty__text">No conversations yet</p>
+        <p className="sidebar-empty__hint">Start by tapping the mic or choosing a topic</p>
       </div>
     );
   }
 
   return (
-    <div className="conversation-list">
+    <div className="sidebar-list">
       {conversations.map((convo) => (
         <ConversationItem
           key={convo.id}

@@ -6,15 +6,17 @@ interface ConversationHeaderProps {
 
 export function ConversationHeader({ title, onMenuToggle, showMenuButton }: ConversationHeaderProps) {
   return (
-    <div className="conversation-header">
+    <div className="conv-header">
       {showMenuButton && (
-        <button className="conversation-header__menu" onClick={onMenuToggle} aria-label="Toggle sidebar">
-          ☰
+        <button className="conv-header__menu" onClick={onMenuToggle} aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
         </button>
       )}
-      <h3 className="conversation-header__title">
+      <span className="conv-header__title">
         {title || "New Conversation"}
-      </h3>
+      </span>
     </div>
   );
 }

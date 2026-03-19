@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { Message } from "@nala/shared";
 import { MessageBubble } from "./message-bubble";
 import { TypingIndicator } from "./typing-indicator";
+import { NalaLogo } from "./nala-logo";
 
 const STARTER_PROMPTS = [
   { emoji: "👋", text: "Tell me about yourself, Nala" },
@@ -28,7 +29,6 @@ export function ChatHistory({ messages, isGenerating, isSpeaking, onPromptSelect
     }
   }, [messages, isGenerating]);
 
-  // The last assistant message is "speaking" if TTS is active
   const lastAssistantIdx = isSpeaking
     ? messages.map((m) => m.role).lastIndexOf("assistant")
     : -1;
@@ -36,20 +36,24 @@ export function ChatHistory({ messages, isGenerating, isSpeaking, onPromptSelect
   return (
     <div className="chat-history">
       {messages.length === 0 && !isGenerating ? (
-        <div className="chat-history__welcome">
-          <h1 className="chat-history__title">Hi, I'm Nala</h1>
-          <p className="chat-history__subtitle">
-            Tap the mic and start talking, or pick a topic below
+        <div className="welcome">
+          <NalaLogo size="lg" />
+          <h1 className="welcome__heading">How can I help you today?</h1>
+          <p className="welcome__sub">
+            Tap the mic to start talking, or try one of these
           </p>
-          <div className="chat-history__prompts">
+          <div className="welcome__prompts">
             {STARTER_PROMPTS.map((prompt) => (
               <button
                 key={prompt.text}
-                className="chat-history__prompt"
+                className="prompt-card"
                 onClick={() => onPromptSelect?.(prompt.text)}
               >
-                <span className="chat-history__prompt-emoji">{prompt.emoji}</span>
-                {prompt.text}
+                <span className="prompt-card__emoji">{prompt.emoji}</span>
+                <span className="prompt-card__text">{prompt.text}</span>
+                <svg className="prompt-card__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             ))}
           </div>

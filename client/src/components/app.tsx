@@ -32,10 +32,12 @@ export function App() {
   const audioAnalyser = useAudioAnalyser();
   const selectedIdRef = useRef(selectedId);
   const messagesRef = useRef(messages);
+  const conversationActiveRef = useRef(conversationActive);
   const micPermissionGranted = useRef(false);
 
   useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { conversationActiveRef.current = conversationActive; }, [conversationActive]);
 
   // Initialize WebLLM on mount
   useEffect(() => {
@@ -54,12 +56,12 @@ export function App() {
   }, []);
 
   const autoResumeListen = useCallback(() => {
-    if (conversationActive) {
+    if (conversationActiveRef.current) {
       audioAnalyser.start().then(() => {
         voiceInput.startListening();
       });
     }
-  }, [conversationActive]);
+  }, []);
 
   // When voice input completes, check for "stop" or send message
   useEffect(() => {
