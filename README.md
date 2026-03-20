@@ -168,6 +168,9 @@ This project was built live in a single Claude Code session (~2 hours) as a tuto
   <a href="https://drive.google.com/file/d/1GbNv7TEwUyeWNFDvmbFm--18sj3Is3HC/view?usp=sharing">
     <img src="https://img.shields.io/badge/%E2%96%B6%EF%B8%8F_Watch_the_Full_Build_Session-4285F4?style=for-the-badge&logo=google-drive&logoColor=white" alt="Watch Full Session" />
   </a>
+  <a href="https://drive.google.com/file/d/1z9IeMx_JT9gBYlaqVFflBzKsblOG0kaH/view?usp=sharing">
+    <img src="https://img.shields.io/badge/%E2%96%B6%EF%B8%8F_Watch_Video_Tutorial-EA4335?style=for-the-badge&logo=google-drive&logoColor=white" alt="Watch Video Tutorial" />
+  </a>
 </p>
 
 ### Prerequisites
